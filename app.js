@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 
 const mongoose = require("mongoose");
@@ -18,9 +20,7 @@ const Note = require('./models/Note');
 // levare eventuali tag da stringhe
 const stripHtmlTags = (text) => text.replace(/<\/?[^>]+(>|$)/g, ""); // Function to strip HTML tags
 
-// connessione db + app
-//"P9G3xICShr4H5dY9"
-const URI = "mongodb+srv://andrea:P9G3xICShr4H5dY9@cluster0.zvc2wry.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
+
 const app = express();
 
 // Middleware setup
@@ -31,26 +31,26 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use(
-    session({
-      secret: "yourSecretKey",
-      resave: false,
-      saveUninitialized: false,
-      cookie: { secure: false }, // Set to 'true' only for HTTPS
-    })
-  );
+  session({
+    secret: process.env.SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: { secure: false }, // Set to 'true' only for HTTPS
+  })
+);
   
-  app.use(passport.initialize());
-  app.use(passport.session());
-  app.use(flash());
-  app.use((req, res, next) => {
-    res.locals.flashMessages = req.flash(); // Make flash messages available in views
-    res.locals.username = req.isAuthenticated() ? req.user.username : null; // Provide username if authenticated
-    next(); // Continue with the next middleware
-  });
+app.use(passport.initialize());
+app.use(passport.session());
+app.use(flash());
+app.use((req, res, next) => {
+  res.locals.flashMessages = req.flash(); // Make flash messages available in views
+  res.locals.username = req.isAuthenticated() ? req.user.username : null; // Provide username if authenticated
+  next(); // Continue with the next middleware
+});
 
 
 // Connessione al database
-mongoose.connect(URI);
+mongoose.connect(process.env.DB_URI);
 mongoose.connection.on("connected", () => console.log("Connesso a MongoDB"));
 mongoose.connection.on("reconnected", () => console.log("Riconnesso a MongoDB"));
 mongoose.connection.on("disconnected", () => console.log("Disconnesso da MongoDB"));
@@ -59,66 +59,66 @@ mongoose.connection.on("error", (err) => console.error("Errore di connessione:",
 
 // Close MongoDB connection on SIGINT (Ctrl+C)
 process.on("SIGINT", () => {
-    mongoose.connection.close(() => {
-        console.log("Chiudo la connessione e termino l'app");
-        process.exit(0);
-    });
+  mongoose.connection.close(() => {
+    console.log("Chiudo la connessione e termino l'app");
+    process.exit(0);
+  });
 });
 
 
 // Passport setup for user authentication
 passport.use(
-    new LocalStrategy(async (username, password, done) => {
-      const user = await User.findOne({ username });
-      if (!user || !(await bcrypt.compare(password, user.password))) {
-        return done(null, false, { message: "Username o password incorretti." });
-      }
-      return done(null, user);
-    })
-  );
-  
-  // Serializzazione e deserializzazione dell'utente
-  passport.serializeUser((user, done) => {
-    done(null, user._id);
-  });
-  
-  passport.deserializeUser(async (id, done) => {
-    const user = await User.findById(id);
-    done(null, user);
-  });
-  
-  // middleware per mantenere l'autenticazione dell'utente
-  const ensureAuthenticated = (req, res, next) => {
-    if (req.isAuthenticated()) {
-      return next(); // User is authenticated
+  new LocalStrategy(async (username, password, done) => {
+    const user = await User.findOne({ username });
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return done(null, false, { message: "Username o password incorretti." });
     }
-    res.redirect("/login"); // Redirect if not authenticated
-  };
+    return done(null, user);
+  })
+);
+  
+// Serializzazione e deserializzazione dell'utente
+passport.serializeUser((user, done) => {
+  done(null, user._id);
+});
+  
+passport.deserializeUser(async (id, done) => {
+  const user = await User.findById(id);
+  done(null, user);
+});
+
+// middleware per mantenere l'autenticazione dell'utente
+const ensureAuthenticated = (req, res, next) => {
+  if (req.isAuthenticated()) {
+    return next(); // User is authenticated
+  }
+  res.redirect("/login"); // Redirect if not authenticated
+};
 
 app.get("/", ensureAuthenticated, async (req, res) => {
-    try {
-      const user = await User.findOne({ username: req.user.username })
-  
-      if (!user) {
-        console.error("User not found");
-        return res.status(404).send("User not found"); // If user is not found
-      }
-  
-      const posts = await Note.find({ author: user.username });
-  
-      res.render("home", {
-        content: "Welcome to your blog!", // Example content
-        posts: posts.map((post) => ({
-          ...post.toObject(), // Convert Mongoose document to plain object
-          truncatedContent: stripHtmlTags(post.content).substring(0, 100) + "...", // Truncated content
-        })),
-        username: user.username, // Pass username to the template
-      });
-    } catch (error) {
-      console.error("Error fetching posts:", error);
-      res.status(500).send("Error fetching posts."); // Handle errors
+  try {
+    const user = await User.findOne({ username: req.user.username })
+
+    if (!user) {
+      console.error("User not found");
+      return res.status(404).send("User not found"); // If user is not found
     }
-  });
+
+    const posts = await Note.find({ author: user.username });
+
+    res.render("home", {
+      content: "Welcome to your blog!", // Example content
+      posts: posts.map((post) => ({
+        ...post.toObject(), // Convert Mongoose document to plain object
+        truncatedContent: stripHtmlTags(post.content).substring(0, 100) + "...", // Truncated content
+      })),
+      username: user.username, // Pass username to the template
+    });
+  } catch (error) {
+    console.error("Error fetching posts:", error);
+    res.status(500).send("Error fetching posts."); // Handle errors
+  }
+});
 
 app.get("/login", (req, res) => {
     res.render("login");
@@ -133,44 +133,51 @@ app.post("/login", passport.authenticate("local", {
 }));
 
 app.get("/register", (req, res) => {
-    res.render("register", { username: req.user ? req.user.username : null });
-  });
+  res.render("register", { username: req.user ? req.user.username : null });
+});
   
-  app.post("/register", async (req, res) => {
-    const { username, password } = req.body;
-  
-    try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-  
-      const newUser = new User({
-        username,
-        password: hashedPassword, // Store the hashed password
-      });
-  
-      await newUser.save();
-  
-      req.login(newUser, (err) => {
-        if (err) {
-          return res.status(500).send("Error during login after registration.");
-        }
-  
-        res.redirect("/"); // Redirect after successful registration
-      });
-    } catch (error) {
-      console.error("Error during registration:", error);
-      res.status(500).send("Registration failed."); // Handle registration errors
+app.post("/register", async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
+      username,
+      password: hashedPassword, // Store the hashed password
+    });
+
+    await newUser.save();
+
+    req.login(newUser, (err) => {
+      if (err) {
+        return res.status(500).send("Error during login after registration.");
+      }
+
+      res.redirect("/"); // Redirect after successful registration
+    });
+  } catch (error) {
+    console.error("Error during registration:", error);
+    res.status(500).send("Registration failed."); // Handle registration errors
+  }
+});
+
+app.get("/notes/:postId", async (req, res) => {
+  try {
+      const post = await Note.findById(req.params.postId);
+
+    if (!post) {
+      return res.status(404).send("Post not found");
     }
-  });
 
+    res.render("notes", {post});
+  } catch (error) {
+    console.error("Error fetching post:", error);
+    res.status(500).send("Error fetching post.");
+  }
+});
 
-
-
-
-
-
-
-
-// Listen on default port 3000
-app.listen(3000, () => {
-    console.log("Server on http://localhost:3000");
+// Listen on default port 
+app.listen(process.env.PORT || 3000, () => {
+    console.log(`Server running on http://localhost:${process.env.PORT || 3000}`);
 });
