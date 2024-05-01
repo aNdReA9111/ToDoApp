@@ -1,0 +1,24 @@
+<%- include("partials/header.ejs") %>
+
+<div class="row page_container position-absolute top-50 translate-middle-y w-100 mx-0">
+  
+  <div class="col-md-8">
+    <form action="/register" method="post">
+      <h3 class="mb-4">Register</h3>
+      <div class="mb-3">
+        <label for="register-email" class="form-label">Username</label>
+        <input type="text" name="username" class="form-control" id="register-email" aria-describedby="emailHelp" required>
+
+      </div>
+      <div class="mb-3">
+        <label for="register-password" class="form-label">Password</label>
+        <input type="password" name="password" class="form-control" id="register-password" required minlength="6">
+
+      </div>
+      <button type="submit" class="btn purple__btn">Submit</button>
+    </form>
+  </div>
+</div>
+
+
+<%- include("partials/footer.ejs") %>
