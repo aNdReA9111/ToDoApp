@@ -27,27 +27,25 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Connessione al database
 mongoose.connect(URI, { useNewUrlParser: true, useUnifiedTopology: true });
-mongoose.connection.on("connected", () => console.log("Connected to MongoDB"));
-mongoose.connection.on("reconnected", () => console.log("Reconnected to MongoDB"));
-mongoose.connection.on("disconnected", () => console.log("Disconnected from MongoDB"));
-mongoose.connection.on("error", (err) => console.error("MongoDB connection error:", err));
+mongoose.connection.on("connected", () => console.log("Connesso a MongoDB"));
+mongoose.connection.on("reconnected", () => console.log("Riconnesso a MongoDB"));
+mongoose.connection.on("disconnected", () => console.log("Disconnesso da MongoDB"));
+mongoose.connection.on("error", (err) => console.error("Errore di connessione:", err));
 
 
 // Close MongoDB connection on SIGINT (Ctrl+C)
 process.on("SIGINT", () => {
     mongoose.connection.close(() => {
-        console.log("MongoDB connection closed due to application termination");
+        console.log("Chiudo la connessione e termino l'app");
         process.exit(0);
     });
 });
-
 
 
 // Content variables
 const homeContent = "This is Home";
 const aboutContent = "This is About";
 const contactContent = "This is Contact";
-
 
 
 app.get("/", async (req, res) => {

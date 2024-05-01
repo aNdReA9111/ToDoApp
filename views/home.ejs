@@ -14,7 +14,7 @@
                 <% } %>
             </div>
             <div class="card-footer">
-              <small class="text-body-secondary">Written by <%= post.author %> in <%= post.place %> on <%= post.date.toDateString() %></small>
+              <small class="text-body-secondary">Written by <%= post.author %> in <%= post.place %> on <%= post.lastEditDate.toDateString() %></small>
               <small class="text-body-secondary">Tags: <%= post.tags.join(', ') %></small>
                 
             </div>
