@@ -9,6 +9,7 @@ const noteSchema = new mongoose.Schema({
   heading: String,
   content: String,
   author: String,
+  place: String,
   creationDate: { type: Date, default: Date.now },
   lastEditDate: { type: Date, default: Date.now },
   tags: [{ type: String }],
