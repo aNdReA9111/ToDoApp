@@ -16,9 +16,41 @@
           <%= post.lastEditDate.toDateString() %>                
         </div>
         <div class="card-body">
-          <h5 data-attribute-id="<%= post._id %>" class="card-title"><%= post.title %></h5>
+
+          <form action="/notes/<%= post._id %>/<% if (post.completed) { %>true<% } else { %>false<% } %>" method="post" class="form-check" onsubmit="event.preventDefault();">
+            <label class="form-check-label" for="main-task">
+              <%= post.title %>
+            </label>
+
+            <input  class="form-check-input" type="checkbox" 
+                    name="main-task" 
+                    id="main-task" 
+                    onchange="this.form.submit()" 
+                    <% if (post.completed) { %> checked <% } %> 
+            >
+          </form>
+
           <!-- Render content without escaping -->
           <p class="card-text"><%- post.content %></p> <!-- Correct EJS syntax -->
+          
+          <% for(let i = 0; i < post.subtasks.length; i++) { %>
+            <span>
+              <form action="/notes/<%= post._id %>/<%= i %>/<% if (post.subtasks[i].completed) { %>true<% } else { %>false<% } %> " method="post" class="form-check" onsubmit="event.preventDefault();">
+                
+                <label class="form-check-label" for="task-<%= i %>">
+                  <%= post.subtasks[i].title %>
+                </label>
+
+                <input class="form-check-input" type="checkbox" 
+                name="task-<%= i %>" 
+                id="task-<%= i %>" 
+                onchange="this.form.submit()" 
+                <% if (post.subtasks[i].completed) { %> checked <% } %> 
+                >
+              </form>
+            </span>
+          <% } %>
+          
           <p class="card-text">
             <small class="text-muted">Written by <%= post.author %> in <%= post.place %></small>
           </p>
