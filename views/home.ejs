@@ -8,10 +8,10 @@
             <div class="card-body">
               <h5 class="card-title"><%= post.heading %></h5>
               <% if (post.content) { %> <!-- Check if content is not undefined -->
-                <p><%= post.content.substring(0, 100) %>....</p>
-                <% } else { %>
-                    <p>Impossibile caricare il contenuto.</p>
-                <% } %>
+                <p><%= post.content.substring(0, 100) %> ...</p>
+              <% } else { %>
+                <p>Impossibile caricare il contenuto.</p>
+              <% } %>
             </div>
             <div class="card-footer">
               <small class="text-body-secondary">Written by <%= post.author %> in <%= post.place %> on <%= post.lastEditDate.toDateString() %></small>

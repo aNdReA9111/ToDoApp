@@ -177,6 +177,56 @@ app.get("/notes/:postId", async (req, res) => {
   }
 });
 
+
+app.post("/notes/:id/:index/:stat", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const index = parseInt(req.params.index, 10);
+    const stat = req.params.stat === 'true';
+
+    const post = await Note.findById(id);
+
+    if (!post) {  return res.status(404).send("Post not found"); }
+
+    if (post.subtasks.length > index && index >= 0) {
+      if (post.subtasks[index]) {
+        post.subtasks[index].completed = !stat;
+        await Note.findByIdAndUpdate(id, {subtasks: post.subtasks}, {new: true});
+        res.redirect(`/notes/${id}`);
+      } else {
+        res.status(400).send("Invalid subtask index");
+      }
+    } else {
+      res.status(400).send("Invalid subtask index");
+    }
+  } catch (error) {
+    console.error("Error updating post:", error);
+    res.status(500).send("Error updating post.");
+  }
+});
+
+app.post("/notes/:id/:stat", async (req, res) => {
+  try {
+    const id = req.params.id;
+    const stat = req.params.stat === 'true';
+
+    const post = await Note.findById(id);
+
+    if (!post) return res.status(404).send("Post not found");
+
+    for(let i=0; i<post.subtasks.length && !stat; ++i)
+      post.subtasks[i].completed = true;
+    
+   
+    await Note.findByIdAndUpdate(id, {subtasks: post.subtasks, completed: !stat}, {new: true});
+    res.redirect(`/notes/${id}`);
+
+  } catch (error) {
+    console.error("Error updating post:", error);
+    res.status(500).send("Error updating post.");
+  }
+});
+
 // Listen on default port 
 app.listen(process.env.PORT || 3000, () => {
     console.log(`Server running on http://localhost:${process.env.PORT || 3000}`);
