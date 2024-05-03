@@ -42,11 +42,14 @@
                 </label>
 
                 <input class="form-check-input" type="checkbox" 
-                name="task-<%= i %>" 
-                id="task-<%= i %>" 
-                onchange="this.form.submit()" 
-                <% if (post.subtasks[i].completed) { %> checked <% } %> 
-                >
+                  name="task-<%= i %>" 
+                  id="task-<%= i %>" 
+                  onchange="this.form.submit()" 
+                  <% if (post.subtasks[i].completed) { %> checked <% } %> 
+                />
+              </form>
+              <form action="/notes/delete/<%= post.author %>/<%= post._id %>/<%= i %>" method="post">
+                <button type="submit">x</button>
               </form>
             </span>
           <% } %>
@@ -57,7 +60,7 @@
           <p class="card-text">
             <small class="text-muted">Tags: <%= post.tags.join(', ') %></small>
           </p>
-          <form action="/notes/delete/<%= post._id %>" method="POST">
+          <form action="/notes/delete/<%= post.author %>/<%= post._id %>" method="POST">
             <button type="submit" class="btn btn-danger">Delete Post</button> 
           </form>
         </div>

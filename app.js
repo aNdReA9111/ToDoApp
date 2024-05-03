@@ -124,7 +124,6 @@ app.get("/login", (req, res) => {
     res.render("login");
 });
 
-
 // https://betaweb.github.io/flashjs/ ma non implementato nella versione corrente
 app.post("/login", passport.authenticate("local", {
     successRedirect: "/",
@@ -162,13 +161,56 @@ app.post("/register", async (req, res) => {
   }
 });
 
-app.get("/notes/:postId", async (req, res) => {
-  try {
-      const post = await Note.findById(req.params.postId);
+app.post("/notes/delete/:username/:id", ensureAuthenticated, async (req, res) => {
+  const nota = await Note.findById(req.params.id);
+  console.log("ok");
 
-    if (!post) {
-      return res.status(404).send("Post not found");
+  if (!nota) {  return res.status(404).send("Post not found"); }
+
+  if (nota.author !== req.user.username) 
+    return res.status(403).send("Non hai i permessi per cancellare la nota.");
+  
+  await Note.findByIdAndDelete(req.params.id);
+  res.redirect('/');
+  
+});
+
+app.post("/notes/delete/:username/:id/:index", ensureAuthenticated, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const index = parseInt(req.params.index, 10);
+
+    const nota = await Note.findById(id);
+
+    if (!nota) {  return res.status(404).send("Post not found"); }
+
+    if (nota.author !== req.user.username) 
+      return res.status(403).send("Non hai i permessi per cancellare la nota.");
+
+    if (nota.subtasks.length > index && index >= 0) {
+      if (nota.subtasks[index]) {
+        nota.subtasks.splice(index, 1);
+        await Note.findByIdAndUpdate(id, {subtasks: nota.subtasks}, {new: true});
+        res.redirect(`/notes/${id}`);
+      } else {
+        res.status(400).send("Invalid subtask index");
+      }
+    } else {
+      res.status(400).send("Invalid subtask index");
     }
+  } catch (error) {
+    console.error("Error updating post:", error);
+    res.status(500).send("Error updating post.");
+  }
+  
+});
+
+
+app.get("/notes/:postId", ensureAuthenticated, async (req, res) => {
+  try {
+    const post = await Note.findById(req.params.postId);
+
+    if (!post) {  return res.status(404).send("Post not found");  }
 
     res.render("notes", {post});
   } catch (error) {
@@ -178,7 +220,7 @@ app.get("/notes/:postId", async (req, res) => {
 });
 
 
-app.post("/notes/:id/:index/:stat", async (req, res) => {
+app.post("/notes/:id/:index/:stat", ensureAuthenticated, async (req, res) => {
   try {
     const id = req.params.id;
     const index = parseInt(req.params.index, 10);
@@ -205,7 +247,7 @@ app.post("/notes/:id/:index/:stat", async (req, res) => {
   }
 });
 
-app.post("/notes/:id/:stat", async (req, res) => {
+app.post("/notes/:id/:stat", ensureAuthenticated, async (req, res) => {
   try {
     const id = req.params.id;
     const stat = req.params.stat === 'true';
@@ -225,6 +267,18 @@ app.post("/notes/:id/:stat", async (req, res) => {
     console.error("Error updating post:", error);
     res.status(500).send("Error updating post.");
   }
+});
+
+
+app.get("/logout", (req, res) => {
+  req.logout((err) => {
+    if (err) {
+      console.error("Error during logout:", err);
+      return res.status(500).send("Error during logout.");
+    }
+
+    res.redirect(302, "/login"); // Use a valid status code and clear redirect
+  });
 });
 
 // Listen on default port 
