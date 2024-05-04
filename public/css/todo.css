@@ -1,0 +1,157 @@
+body{
+    background-color:blanchedalmond;
+}
+
+.container{
+overflow-y: auto;
+    overflow-x: hidden;
+    margin-top: 10%;
+    border-radius: 10px;
+    border: 2px solid black;
+
+    width: 60vw;
+    height: 60vh;
+}
+
+.header-container{
+    margin-top: 2vh;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    
+}
+
+.title-font{
+    font-family: "Briem Hand", cursive;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-style: normal;
+    font-size: 1.3em;
+}
+
+
+.subtask-container{
+    width: 57vw;
+    display: flex;
+    flex-direction: column;
+    gap: 1vh;
+    margin-top: 2vh;
+}
+
+
+.subtask{
+    width: 100%;
+}
+
+.flex-accordion{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1vh;
+    gap: 2%;
+
+    width: 100%;
+}
+
+.icon{
+    margin-left: 1vh;
+    margin-top: 2.5vh;
+    display: block;
+}
+
+.icon-red, .icon-trash:hover{
+    color: red;
+    
+}
+
+.icon-green{
+    color: green;
+}
+
+
+.icon-completed:hover{
+    cursor: pointer;
+    animation: bigger 1s infinite;
+}
+
+
+@keyframes bigger {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.3);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.flex-subsubtask{
+    display: flex;
+    align-items: center;
+    margin-bottom: 1vh;
+    gap: 2%;
+}
+
+.icon-container{
+    display: flex;
+    justify-content: flex-end;
+    margin-left: 42vw;
+    margin-right: 2vh;
+}
+
+
+.add-note{
+    width: 100%;
+    border: 3px dashed lightgray;
+    border-radius: 10px;
+    background-color: white;
+    height: 3em;
+    cursor: pointer;
+}
+
+.add-note:hover{
+    cursor: pointer;
+    animation: rotate-border 1s infinite;
+}
+
+
+@keyframes rotate-border {
+    0% { border-color: lightgray; }
+    50% { border-color: darkgray; }
+    100% { border-color: lightgray; }
+}
+
+
+.pending{
+    text-align: center;
+    margin-top: 2vh;
+    animation: blink 2s infinite;
+}
+
+
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+.subtask-input{
+    border: none;
+    width: 45vw;
+}
+
+.subsubtask-input{
+    animation: blink2 2s infinite;
+    border:none;
+}
+
+@keyframes blink2 {
+    0% { opacity: 1; }
+    50% { opacity: 0.0; }
+    100% { opacity: 1; }
+}
+
+.subtask-input:focus, .subtask-input:active, .subtask-input:hover {
+    border: none;
+}
