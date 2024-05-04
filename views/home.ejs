@@ -1,27 +1,120 @@
 <%- include('partials/header'); -%>
-<h1>Home</h1>
-<p><%= content %></p>
-<div class="row row-cols-1 row-cols-md-3 g-4">
-    <% posts.forEach(post => { %>
-        <div class="col">
-          <div class="card h-100">
-            <div class="card-body">
-              <h5 class="card-title"><%= post.heading %></h5>
-              <% if (post.content) { %> <!-- Check if content is not undefined -->
-                <p><%= post.content.substring(0, 100) %> ...</p>
-              <% } else { %>
-                <p>Impossibile caricare il contenuto.</p>
-              <% } %>
-            </div>
-            <div class="card-footer">
-              <small class="text-body-secondary">Written by <%= post.author %> in <%= post.place %> on <%= post.lastEditDate.toDateString() %></small>
-              <small class="text-body-secondary">Tags: <%= post.tags.join(', ') %></small>
-                
-            </div>
-            <button type="button" class="btn btn-outline-info"><a href="/notes/<%= post._id %>"> Read more</a></button>
-          </div>
-        </div>
-    <% }); %>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<link href="https://getbootstrap.com/docs/5.3/assets/css/docs.css" rel="stylesheet">
+
+
+<link href="./css/todo.css" rel="stylesheet">
+
+
+<!-- Font title-container -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Briem+Hand:wght@624&display=swap" rel="stylesheet">
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+
+
+  <div class="container">
+    <div class="header-container">
+      <p class="title-container title-font"> Cose da fare: %></p>
     </div>
+    <div class="accordion accordion-flush subtask-container" id="subtask-container">
+      <% let counter=0; 
+        posts.forEach(post => { %>
+        <div class="flex-accordion">
+            <div class="accordion-item subtask">
+                <h2 class="accordion-header">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne-<%= post._id %>" aria-expanded="false" aria-controls="flush-collapseOne">
+                      <form method="post" action="/edit/<%= post._id %>">
+                        <input  id="heading-<%= post._id %>" type="text" name="title" class="subtask-input" 
+                                value="<%= post.heading %>" 
+                                onclick="this.removeAttribute('readonly'); this.focus();"
+                                onblur="this.form.submit();"
+                                readonly>
+                      </form>
+                    </button>
+                </h2>
+                <div id="flush-collapseOne-<%= post._id %>" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
+                  
+                    <div class="accordion-body subtask-container">
+                       
+                        <ul>
+                          <% 
+                          for(let i = 0; i < post.subtasks.length; i++) { %>
+                              <li class="flex-subsubtask">
+                                <%= post.subtasks[i].title %>
+                                <div class="icon-container">
+                                  <form action="/notes/<%= post._id %>/<%= i %>/<% if (post.subtasks[i].completed) { %>true<% } else { %>false<% } %>" method="post">
+                                    <% if (post.subtasks[i].completed) { %> 
+                                      <i onclick="this.parentNode.submit()" class="bi bi-check icon-completed icon-green"></i>
+                                    <% } else {%>   
+                                      <i  onclick="this.parentNode.submit()" class="bi bi-x icon-completed icon-red"></i>
+                                    <% } %>
+                                  </form>
+
+                                    <form action="/notes/delete/<%= post.author %>/<%= post._id %>/<%= i %>" method="post">
+                                      <i onclick="this.parentNode.submit()" class="bi bi-trash icon-trash"></i>
+                                    </form>
+                                    
+                                </div>
+                              </li>
+                          <% } %>
+
+                              <form action="/addSubNote/<%= post._id %>" method="post">
+                                <input type="text" name="task" class="subsubtask-input" id="addSubnote" 
+                                  onclick="this.removeAttribute('readonly'); this.focus();"
+                                  onblur="if(this.value !== '') {this.form.submit();}"
+                                  onkeydown="if(event.keyCode==13) {this.form.submit();return false;}"
+                                  placeholder="Aggiungi subtask ..." readonly />
+                              </form>
+                              
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+
+              <form action="/notes/<%= post._id %>/<% if (post.completed) { %>true<% } else { %>false<% } %>" method="post">
+                <% if (post.completed) { %> 
+                  <i onclick="this.parentNode.submit()" class="bi bi-check icon icon-completed icon-green"></i>
+                <% } else {%>   
+                  <i  onclick="this.parentNode.submit()" class="bi bi-x icon icon-completed icon-red"></i>
+                <% counter++;} %>
+              </form>
+
+              <form method="post" action="/notes/delete/<%= post.author %>/<%= post._id %>">
+                <a onclick="this.parentNode.submit()" class="bi bi-trash icon icon-trash"></a>
+              </form>
+
+            
+
+        </div>
+      <% }); %>
+        
+        
+        <form action="/addNote" method="post">
+          <input  id="addNote" type="text" name="title" class="subtask add-note" 
+                  placeholder="Aggiungi una nota ..."
+                  onclick="this.removeAttribute('readonly'); this.focus();"
+                  onblur="if(this.value !== '') {this.form.submit();}"
+                  onkeydown="if(event.keyCode==13) {this.form.submit();return false;}"
+                  readonly />
+        </form>
+          
+    </div>
+    
+    <div class="pending">
+        <% if (counter == 0) { %>
+          <p class="pending-font">Niente da fare</p>
+        <% } else { %>
+          <p class="pending-font">Ancora <%= counter %> Task da completare</p>
+        <% } %>
+    </div>
+</div>
+
+    <script src="/public/js/todo.js"></script>
+
 <%- include('partials/footer'); -%>
 

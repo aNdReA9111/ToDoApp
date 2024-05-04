@@ -163,7 +163,6 @@ app.post("/register", async (req, res) => {
 
 app.post("/notes/delete/:username/:id", ensureAuthenticated, async (req, res) => {
   const nota = await Note.findById(req.params.id);
-  console.log("ok");
 
   if (!nota) {  return res.status(404).send("Post not found"); }
 
@@ -191,7 +190,7 @@ app.post("/notes/delete/:username/:id/:index", ensureAuthenticated, async (req, 
       if (nota.subtasks[index]) {
         nota.subtasks.splice(index, 1);
         await Note.findByIdAndUpdate(id, {subtasks: nota.subtasks}, {new: true});
-        res.redirect(`/notes/${id}`);
+        res.redirect(`/`);
       } else {
         res.status(400).send("Invalid subtask index");
       }
@@ -234,7 +233,7 @@ app.post("/notes/:id/:index/:stat", ensureAuthenticated, async (req, res) => {
       if (post.subtasks[index]) {
         post.subtasks[index].completed = !stat;
         await Note.findByIdAndUpdate(id, {subtasks: post.subtasks}, {new: true});
-        res.redirect(`/notes/${id}`);
+        res.redirect(`/`);
       } else {
         res.status(400).send("Invalid subtask index");
       }
@@ -261,7 +260,7 @@ app.post("/notes/:id/:stat", ensureAuthenticated, async (req, res) => {
     
    
     await Note.findByIdAndUpdate(id, {subtasks: post.subtasks, completed: !stat}, {new: true});
-    res.redirect(`/notes/${id}`);
+    res.redirect(`/`);
 
   } catch (error) {
     console.error("Error updating post:", error);
@@ -280,6 +279,80 @@ app.get("/logout", (req, res) => {
     res.redirect(302, "/login"); // Use a valid status code and clear redirect
   });
 });
+
+
+app.post("/edit/:id", ensureAuthenticated, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { title } = req.body;
+
+    const post = await Note.findById(id);
+
+    if (!post) return res.status(404).send("Post not found");
+
+    if (post.author !== req.user.username) 
+      return res.status(403).send("Non hai i permessi per modificare la nota.");
+    
+    await Note.findByIdAndUpdate(id, {heading: title}, {new: true});
+    res.redirect(`/`);
+
+  } catch (error) {
+    console.log("Error updating post:", error);
+    res.status(500).send("Error updating post.");
+  }
+});
+
+
+app.post("/addNote", ensureAuthenticated, async (req, res) => {
+  try {
+    const { title } = req.body;
+
+    const newNote = new Note({
+      heading: title,
+      content: "Tes",
+      author: req.user.username,
+      subtasks: []
+    });
+
+    await newNote.save();
+
+    res.redirect(`/`);
+
+  } catch (error) {
+    console.log("Error saving new note:", error);
+    res.status(500).send("Error saving new note.");
+  }
+});
+
+
+
+app.post("/addSubNote/:id", ensureAuthenticated, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const { task } = req.body;
+
+
+    const post = await Note.findById(id);
+
+    if (!post) return res.status(404).send("Post not found");
+
+    if (post.author !== req.user.username) 
+      return res.status(403).send("Non hai i permessi per aggiungere una sottonota.");
+    
+    post.subtasks.push({
+      title: task
+    });
+
+    await Note.findByIdAndUpdate(id, {subtasks: post.subtasks}, {new: true});
+    res.redirect(`/`);
+
+  } catch (error) {
+    console.log("Error adding subtask:", error);
+    res.status(500).send("Error adding subtask.");
+  }
+});
+
+
 
 // Listen on default port 
 app.listen(process.env.PORT || 3000, () => {
