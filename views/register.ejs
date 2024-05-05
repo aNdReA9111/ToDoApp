@@ -1,22 +1,23 @@
 <%- include("partials/header.ejs") %>
 
-<div class="row page_container position-absolute top-50 translate-middle-y w-100 mx-0">
-  
-  <div class="col-md-8">
-    <form action="/register" method="post">
-      <h3 class="mb-4">Register</h3>
-      <div class="mb-3">
-        <label for="register-email" class="form-label">Username</label>
-        <input type="text" name="username" class="form-control" id="register-email" aria-describedby="emailHelp" required>
+<link rel="stylesheet" href="/css/login.css">
 
-      </div>
-      <div class="mb-3">
-        <label for="register-password" class="form-label">Password</label>
-        <input type="password" name="password" class="form-control" id="register-password" required minlength="6">
-
-      </div>
-      <button type="submit" class="btn purple__btn">Submit</button>
-    </form>
+<div class="card mx-auto" style="width: 24rem; margin-top: 9%;">
+  <div style="text-align: center;">
+      <h1>Registrati</h1>
+  </div>
+  <div class="card-body flex-card">
+      <form action="/register" method="POST" class="flex-card">
+          <div class="form-group">
+              <label for="username">Username:</label>
+              <input type="text" class="form-control" id="username" name="username" required>
+          </div>
+          <div class="form-group">
+              <label for="password">Password:</label>
+              <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Crea Account</button>
+      </form>
   </div>
 </div>
 

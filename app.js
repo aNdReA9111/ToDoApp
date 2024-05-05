@@ -407,6 +407,29 @@ app.post("/deleteTag/:username/:id/:index", ensureAuthenticated, async (req, res
 });
 
 
+app.get("/about", (req, res) => {
+  res.render("aboutus");
+});
+
+
+app.get("/contact", (req, res) => {
+  res.render("contact");
+});
+
+
+
+app.get("/info", ensureAuthenticated, async (req, res) => {
+  try {
+    const user = await User.findOne({username: req.user.username});
+    if(!user) return res.status(404).send("Utente non trovato");
+    res.render("info", {account: user});
+  } catch (error) {
+    console.log("Error rendering info:", error);
+    res.status(500).send("Error rendering info.");
+  }
+});
+
+
 
 // Listen on default port 
 app.listen(process.env.PORT || 3000, () => {
