@@ -107,10 +107,8 @@ app.get("/", ensureAuthenticated, async (req, res) => {
     const posts = await Note.find({ author: user.username });
 
     res.render("home", {
-      content: "Welcome to your blog!", // Example content
       posts: posts.map((post) => ({
         ...post.toObject(), // Convert Mongoose document to plain object
-        truncatedContent: stripHtmlTags(post.content).substring(0, 100) + "...", // Truncated content
       })),
       username: user.username, // Pass username to the template
     });
@@ -232,7 +230,9 @@ app.post("/notes/:id/:index/:stat", ensureAuthenticated, async (req, res) => {
     if (post.subtasks.length > index && index >= 0) {
       if (post.subtasks[index]) {
         post.subtasks[index].completed = !stat;
-        await Note.findByIdAndUpdate(id, {subtasks: post.subtasks}, {new: true});
+        if(stat)
+          post.completed = false;
+        await Note.findByIdAndUpdate(id, {subtasks: post.subtasks, completed: post.completed}, {new: true});
         res.redirect(`/`);
       } else {
         res.status(400).send("Invalid subtask index");
@@ -349,6 +349,60 @@ app.post("/addSubNote/:id", ensureAuthenticated, async (req, res) => {
   } catch (error) {
     console.log("Error adding subtask:", error);
     res.status(500).send("Error adding subtask.");
+  }
+});
+
+
+app.post("/addTag/:username/:id/", ensureAuthenticated, async (req, res) => {
+  try {
+    const id = req.params.id;
+    let {tag} = req.body;
+    tag = tag.trim().toLowerCase();
+    
+
+    const nota = await Note.findById(id);
+
+    if (!nota) return res.status(404).send("Post not found");
+
+    if (nota.author !== req.user.username) 
+      return res.status(403).send("Non hai i permessi per aggiungere o eliminare tag.");
+    
+    if(!nota.tags.includes(tag))
+      nota.tags.push(tag);
+
+    await Note.findByIdAndUpdate(id, {tags: nota.tags}, {new: true});
+    res.redirect(`/`);
+    
+
+  } catch (error) {
+    console.log("Error adding tag:", error);
+    res.status(500).send("Error adding tag.");
+  }
+});
+
+app.post("/deleteTag/:username/:id/:index", ensureAuthenticated, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const index = parseInt(req.params.index, 10);
+
+    const nota = await Note.findById(id);
+
+    if (!nota) return res.status(404).send("Post not found");
+
+    if (nota.author !== req.user.username) 
+      return res.status(403).send("Non hai i permessi per aggiungere o eliminare tag.");
+    
+    if(index < 0 || index >= nota.tags.length)
+      return res.status(400).send("Indice non valido.");
+    
+    nota.tags.splice(index, 1);
+
+    await Note.findByIdAndUpdate(id, {tags: nota.tags}, {new: true});
+    res.redirect(`/`);
+
+  } catch (error) {
+    console.log("Error adding tag:", error);
+    res.status(500).send("Error adding tag.");
   }
 });
 

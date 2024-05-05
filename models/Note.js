@@ -7,11 +7,8 @@ const subtaskSchema = new mongoose.Schema({
 
 const noteSchema = new mongoose.Schema({
   heading: String,
-  content: String,
   author: String,
-  place: String,
   creationDate: { type: Date, default: Date.now },
-  lastEditDate: { type: Date, default: Date.now },
   tags: [{ type: String }],
   completed: { type: Boolean, default: false },
   subtasks: [subtaskSchema]

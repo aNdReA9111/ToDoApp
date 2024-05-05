@@ -37,40 +37,80 @@
                     </button>
                 </h2>
                 <div id="flush-collapseOne-<%= post._id %>" class="accordion-collapse collapse" data-bs-parent="#accordionFlushExample">
-                  
-                    <div class="accordion-body subtask-container">
-                       
-                        <ul>
-                          <% 
-                          for(let i = 0; i < post.subtasks.length; i++) { %>
-                              <li class="flex-subsubtask">
-                                <%= post.subtasks[i].title %>
-                                <div class="icon-container">
-                                  <form action="/notes/<%= post._id %>/<%= i %>/<% if (post.subtasks[i].completed) { %>true<% } else { %>false<% } %>" method="post">
-                                    <% if (post.subtasks[i].completed) { %> 
-                                      <i onclick="this.parentNode.submit()" class="bi bi-check icon-completed icon-green"></i>
-                                    <% } else {%>   
-                                      <i  onclick="this.parentNode.submit()" class="bi bi-x icon-completed icon-red"></i>
-                                    <% } %>
-                                  </form>
-
-                                    <form action="/notes/delete/<%= post.author %>/<%= post._id %>/<%= i %>" method="post">
-                                      <i onclick="this.parentNode.submit()" class="bi bi-trash icon-trash"></i>
-                                    </form>
-                                    
-                                </div>
+                    <div class="accordion-body">
+                      <ul class="subtask-container">
+                        <% for(let i = 0; i < post.subtasks.length; i++) { %>
+                          <div class="flex-subsubtask">
+                              <li class="subtask-title">
+                                <input type="text" name="subtask" class="subsubtask-input" value="<%= post.subtasks[i].title %>" readonly>
                               </li>
-                          <% } %>
+                              <div class="icon-container">
+                                <form action="/notes/<%= post._id %>/<%= i %>/<% if (post.subtasks[i].completed) { %>true<% } else { %>false<% } %>" method="post">
+                                  <% if (post.subtasks[i].completed) { %> 
+                                    <i onclick="this.parentNode.submit()" class="bi bi-check icon-completed icon-green"></i>
+                                  <% } else {%>   
+                                    <i  onclick="this.parentNode.submit()" class="bi bi-x icon-completed icon-red"></i>
+                                  <% } %>
+                                </form>
 
-                              <form action="/addSubNote/<%= post._id %>" method="post">
-                                <input type="text" name="task" class="subsubtask-input" id="addSubnote" 
-                                  onclick="this.removeAttribute('readonly'); this.focus();"
-                                  onblur="if(this.value !== '') {this.form.submit();}"
-                                  onkeydown="if(event.keyCode==13) {this.form.submit();return false;}"
-                                  placeholder="Aggiungi subtask ..." readonly />
+                                <form action="/notes/delete/<%= post.author %>/<%= post._id %>/<%= i %>" method="post">
+                                  <i onclick="this.parentNode.submit()" class="bi bi-trash icon-trash"></i>
+                                </form>
+                                
+                            </div>
+                          </div>
+                        <% } %>
+
+                        <form action="/addSubNote/<%= post._id %>" method="post">
+                          <input type="text" name="task" class="subsubtask-input-btn" id="addSubnote" 
+                            onclick="this.removeAttribute('readonly'); this.focus();"
+                            onblur="if(this.value !== '') {this.form.submit();}"
+                            onkeydown="if(event.keyCode==13) {this.form.submit();return false;}"
+                            placeholder="Digita subtask ..." readonly />
+                        </form>
+                            
+                      </ul>
+
+                      <p>Data: <%= post.creationDate.toDateString() %></p>
+                      <div class="tags-container">
+                        Tags: 
+                        <% for(let j = 0; j < post.tags.length; j++) { %>
+                          <div class="badge bg-primary tagDiv"><%= post.tags[j] %> 
+                            <form action="/deleteTag/<%= post.author %>/<%= post._id %>/<%= j %>" method="post">
+                              <button class="badge bg-primary btnTag " type="submit"><i class="bi bi-x"></i></button>
+                            </form>
+                          </div>
+                        <% } %>          
+                        <button type="button" class="badge text-bg-secondary btnTag" data-bs-toggle="modal" data-bs-target="#addTagModal-<%= post._id %>">+</button>        
+                        </div>
+
+                      
+                        
+                      <div class="modal fade" id="addTagModal-<%= post._id %>"" tabindex="-1" aria-labelledby="addTagModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                          <div class="modal-content">
+                            <div class="modal-header">
+                              <h1 class="modal-title fs-5" id="addTagModalLabel">Aggiungi tag</h1>
+                              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                              <form id="tagForm-<%= post._id %>" action="/addTag/<%= post.author %>/<%= post._id %>" method="post">
+                                  <input type="text" name="tag" class="form-control" id="tag" placeholder="Nuovo tag">
                               </form>
+                            </div>
+                            <div class="modal-footer">
+                              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annula</button>
+                              <input type="submit" form="tagForm-<%= post._id %>" class="btn btn-primary" value="Aggiungi" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
                               
-                        </ul>
+                            
+                      
+                    
+
+                          
                     </div>
                 </div>
             </div>
@@ -85,24 +125,20 @@
               </form>
 
               <form method="post" action="/notes/delete/<%= post.author %>/<%= post._id %>">
-                <a onclick="this.parentNode.submit()" class="bi bi-trash icon icon-trash"></a>
+                <i onclick="this.parentNode.submit()" class="bi bi-trash icon icon-trash"></i>
               </form>
-
-            
-
         </div>
       <% }); %>
         
         
         <form action="/addNote" method="post">
           <input  id="addNote" type="text" name="title" class="subtask add-note" 
-                  placeholder="Aggiungi una nota ..."
+                  placeholder="  Aggiungi una nota ..."
                   onclick="this.removeAttribute('readonly'); this.focus();"
                   onblur="if(this.value !== '') {this.form.submit();}"
                   onkeydown="if(event.keyCode==13) {this.form.submit();return false;}"
-                  readonly />
+                  readonly />          
         </form>
-          
     </div>
     
     <div class="pending">
