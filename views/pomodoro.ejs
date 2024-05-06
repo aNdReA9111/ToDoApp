@@ -1,0 +1,30 @@
+<%- include('partials/header'); -%>
+
+<div class="global-container">
+    <p id="state">Stato</p>
+
+    <div class="container">
+    <div class="progress-ring"></div>
+    <div class="overlay-circle"></div>
+    <div id="timer" class="timer">00:00</div>
+    </div>
+
+    <form id="studyForm">
+    <div class="grid-container">
+        <input type="number" id="studyTime" name="studyTime" min="1" required placeholder="Durata ciclo (minuti)">
+
+        <input type="number" id="studyCycles" name="studyCycles" min="1" required placeholder="Numero cicli">
+
+        <input type="number" id="breakTime" name="breakTime" min="1" required placeholder="Durata pausa (minuti)">
+    </div>
+    <div class="grid-button">
+        <button type="submit" id="startButton">Inizia la sessione</button>
+    <div>
+    </form>
+</div>
+
+<link rel="stylesheet" href="css/pomodoro.css">
+<link rel="stylesheet" href="css/root.css" />
+<script src="js/pomodoro.js"></script>
+
+<%- include('partials/footer'); -%>

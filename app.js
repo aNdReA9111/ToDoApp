@@ -399,8 +399,7 @@ app.post("/deleteTag/:username/:id/:index", ensureAuthenticated, async (req, res
 
     await Note.findByIdAndUpdate(id, {tags: nota.tags}, {new: true});
     res.redirect(`/`);
-
-  } catch (error) {
+vb  } catch (error) {
     console.log("Error adding tag:", error);
     res.status(500).send("Error adding tag.");
   }
@@ -416,6 +415,9 @@ app.get("/contact", (req, res) => {
   res.render("contact");
 });
 
+app.get("/pomodoro", ensureAuthenticated, (req, res) => {
+  res.render("pomodoro");
+});
 
 
 app.get("/info", ensureAuthenticated, async (req, res) => {

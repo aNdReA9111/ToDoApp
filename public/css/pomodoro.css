@@ -1,0 +1,87 @@
+.global-container {
+    /* font-family: Arial, sans-serif; */
+    /* background-color: #9fffaf; */
+    color: #E4D9B9;
+    display: flex;
+    gap: 2vh;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+
+  }
+  
+  .grid-container{
+    display: grid;
+    grid-template-columns: repeat(3, 30vh);
+    gap: 4vh;
+    margin-top: 7vh;
+  }
+  
+  .grid-button{
+    display: flex;
+    justify-content: center;
+  }
+  
+  input, button {
+    background-color: #28282A;
+    border: 0.5vh solid #EC0D0D;
+    border-radius: 5px;
+    padding: 3vh;
+    color: #E4D9B9;
+    margin-bottom: 3vh;
+  }
+           
+  button{
+    width: 50vh;
+    font-size: 1em;
+    
+  }
+  
+  #state {
+    color: #EC0D0D;
+    text-align: center;
+    padding: 10px;
+  }
+  
+  #studyForm{
+    position: relative;
+    margin-top: 5vh;
+  }
+  
+  .container {
+    position: relative;
+    margin-bottom: 5vh;
+    width: 40vh;
+    height: 40vh;
+  }
+  
+  .progress-ring, .overlay-circle {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 40vh;
+    height: 40vh;
+  }
+  
+  .progress-ring {
+    border-radius: 50%;
+    background: conic-gradient(
+      #EC0D0D 0deg var(--deg, 3600deg),
+      transparent 0deg 360deg
+    );
+  }
+  
+  .overlay-circle {
+    clip-path: circle(45%); /* Clip path per mostrare solo il 90% del cerchio sottostante */
+    background: blanchedalmond;
+  }
+  
+  .timer {
+    position: absolute;
+    color: #EC0D0D;
+    top: 20vh;
+    left: 20vh;
+    transform: translate(-50%, -50%);
+    font-size: 6vh;
+  }
+  
